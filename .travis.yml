@@ -3,20 +3,33 @@ services:
   - docker
 
 before_install:
-  - docker build -t acovidovic/react-test -f ./client/Dockerfile.dev ./client
+  - docker build -t Acovid/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run acovidovic/react-test npm test -- --coverage
+  - docker run Acovid/react-test npm test -- --coverage
 
 after_success:
-  - docker build -t acovidovic/multi-client ./client
-  - docker build -t acovidovic/multi-nginx ./nginx
-  - docker build -t acovidovic/multi-server ./server
-  - docker build -t acovidovic/multi-worker ./worker
+  - docker build -t Acovid/multi-client ./client
+  - docker build -t Acovid/multi-nginx ./nginx
+  - docker build -t Acovid/multi-server ./server
+  - docker build -t Acovid/multi-worker ./worker
   # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # Take those images and push them to docker hub
-  - docker push acovidovic/multi-client
-  - docker push acovidovic/multi-nginx
-  - docker push acovidovic/multi-server
-  - docker push acovidovic/multi-worker
+  - docker push Acovid/multi-client
+  - docker push Acovid/multi-nginx
+  - docker push Acovid/multi-server
+  - docker push Acovid/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-2
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-east-2-813931879953
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key:
+    secure: $AWS_SECRET_KEY
